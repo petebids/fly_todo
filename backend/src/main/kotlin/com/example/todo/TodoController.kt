@@ -1,11 +1,9 @@
 package com.example.todo
 
-import java.util.UUID
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.HttpStatus.NOT_FOUND
-import org.springframework.http.HttpStatus.OK
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
+import java.util.UUID
 
 @CrossOrigin("*")
 @RestController
@@ -34,16 +33,17 @@ class TodoController(private val todoService: TodoService) {
 
   @GetMapping("/{id}")
   fun retrieveTodo(@PathVariable id: UUID): ResponseEntity<TodoResourceFull> {
-    val todo = todoService.fetch(id) ?: throw ResponseStatusException(NOT_FOUND)
-    return ResponseEntity(todo.toFullResource(), OK)
+    return todoService.fetch(id)?.let { ResponseEntity.ok(it.toFullResource()) }
+        ?: throw ResponseStatusException(NOT_FOUND)
   }
 
-  @DeleteMapping  ("/{id}")
-  fun deleteTodo(@PathVariable id: UUID): ResponseEntity<Void> {
-      todoService.delete(id)
-      return ResponseEntity(HttpStatus.NO_CONTENT)
-  }
+  @DeleteMapping("/{id}")
+  fun deleteTodo(@PathVariable id: UUID): ResponseEntity<Unit> =
+      todoService.delete(id).let { ResponseEntity(HttpStatus.NO_CONTENT) }
 
+  @PostMapping("/{id}:complete")
+  fun completeTodo(@PathVariable id: UUID): ResponseEntity<Todo> =
+      ResponseEntity.ok(todoService.completeTodo(id))
 
   @PutMapping("/{id}/checklist")
   fun updateChecklist(

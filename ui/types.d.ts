@@ -20,3 +20,8 @@ interface Item {
     details: string
     completed: boolean
 }
+
+
+interface AddChecklistItemRequest{
+    details: string
+}

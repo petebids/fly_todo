@@ -65,7 +65,7 @@ function TodosData({ name }: { name: string }) {
 
 async function fetchTodosRsql(name: string): Promise<Page<Todo>> {
     const result = await fetch(
-        `http://localhost:8080/v1/todos?q=${encodeURIComponent(buildQuery(name))}`
+        `${process.env.NEXT_PUBLIC_API_HOST}/v1/todos?q=${encodeURIComponent(buildQuery(name))}`
     );
     return result.json();
 }

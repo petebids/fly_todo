@@ -30,6 +30,9 @@ dependencies {
     implementation("io.github.erdtman:java-json-canonicalization:1.1")
     implementation("io.github.perplexhub:rsql-jpa-spring-boot-starter:6.0.23")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

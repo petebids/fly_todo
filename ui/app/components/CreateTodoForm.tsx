@@ -8,7 +8,7 @@ interface CreateTodoInput {
 
 
 async function createTodo(createTodoForm: CreateTodoInput) {
-    const res = await fetch('http://localhost:8080/v1/todos', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_HOST}/v1/todos`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

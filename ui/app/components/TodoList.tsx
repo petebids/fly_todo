@@ -4,7 +4,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 
 async function handleDeleteTodo(id: string) {
 
-    const response = await fetch(`http://localhost:8080/v1/todos/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_HOST}/v1/todos/${id}`, {
         method: 'DELETE'
     });
 
@@ -14,13 +14,39 @@ async function handleDeleteTodo(id: string) {
 }
 
 
+async function completeTodo(id: string) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_HOST}/v1/todos/${id}:complete`, {
+        method: 'POST'
+    });
+
+    if (!response.ok) {
+        throw Error()
+    }
+}
+
 export default function TodoList({todos}: { todos: Page<Todo> }) {
 
     const queryClient = useQueryClient();
 
     const deleteMutation = useMutation({
         mutationFn: handleDeleteTodo,
-        onSuccess: () => queryClient.refetchQueries()
+        onSuccess: () => queryClient.refetchQueries(),
+        onError: (error, variables, context) => {
+            console.log(variables)
+            console.log(context)
+            alert(error)
+        }
+    })
+
+    const completeMutation = useMutation({
+        mutationFn: completeTodo,
+        onSuccess: () => queryClient.refetchQueries(),
+        onError: (error, variables, context) => {
+            console.log(variables)
+            console.log(context)
+            alert(error)
+        }
+
     })
 
     return (
@@ -63,9 +89,8 @@ export default function TodoList({todos}: { todos: Page<Todo> }) {
                                     type="checkbox"
                                     checked={todo.completed}
                                     onChange={() => {
-                                    }
-                                        //handleToggleCompleted(todo.id, todo.completed)
-                                    }
+                                        completeMutation.mutate(todo.id)
+                                    }}
                                     className="form-checkbox h-5 w-5 text-blue-600"
                                 />
                             </td>

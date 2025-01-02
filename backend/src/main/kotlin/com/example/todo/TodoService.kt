@@ -27,7 +27,14 @@ class TodoService(private val todoRepository: TodoRepository) {
     }
   }
 
-  fun delete(id: UUID): Unit = todoRepository.deleteById(id)
+  fun delete(id: UUID): Unit? = todoRepository.findByIdOrNull(id)?.let {
+      when(it.checklist.count { checkItem -> !checkItem.completed }){
+          0 -> todoRepository.delete(it)
+          else -> throw  IllegalStateException(
+              "Cant complete ${it.id} with outstanding items ${it.checklist.map { ch -> ch.details }}")
+
+      }
+  }
 
   fun fetch(id: UUID): Todo? = todoRepository.findByIdOrNull(id)
 
@@ -38,10 +45,19 @@ class TodoService(private val todoRepository: TodoRepository) {
       val item =
           checklist.find { item -> item.details == details }?.copy(completed = completed)
               ?: CheckItem(details, completed)
-
       return todoRepository.save(it.copy(checklist = checklist + item))
     } ?: throw RuntimeException()
   }
+
+  fun completeTodo(id: UUID): Todo? =
+      todoRepository.findByIdOrNull(id)?.let {
+        when (it.checklist.count { item -> !item.completed }) {
+          0 -> return@let todoRepository.save(it)
+          else ->
+              throw IllegalStateException(
+                  "Cant complete ${it.id} with outstanding items ${it.checklist.map { ch -> ch.details }}")
+        }
+      }
 
   fun completeCheckListItem(): Todo {
     TODO()

@@ -2,22 +2,52 @@ package com.example.todo
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import net.minidev.json.annotate.JsonIgnore
 import java.util.UUID
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.http.MediaType
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.util.MultiValueMap
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class TodoControllerTest {
+
+  companion object {
+    @Container
+    val database: PostgreSQLContainer<*> =
+        PostgreSQLContainer("postgres:latest").apply {
+          this.withPassword("postgres").withUsername("postgres")
+        }
+
+    @DynamicPropertySource
+    @JvmStatic
+    fun registerDynamicProperties(registry: DynamicPropertyRegistry) {
+
+      registry.add("spring.datasource.url", database::getJdbcUrl)
+      registry.add("spring.datasource.username", database::getUsername)
+      registry.add("spring.datasource.password", database::getPassword)
+      registry.add("spring.datasource.driver-class-name", database::getDriverClassName)
+      registry.add("spring.jpa.databasePlatform") { "org.hibernate.dialect.PostgreSQLDialect" }
+    }
+
+    @BeforeAll
+    @JvmStatic
+    fun start() {
+      database.start()
+    }
+  }
 
   @Autowired lateinit var mockMvc: MockMvc
   private val objectMapper = jacksonObjectMapper()
@@ -33,7 +63,8 @@ class TodoControllerTest {
         .andExpect {
           content { contentType(MediaType.APPLICATION_JSON) }
           status { isOk() }
-          content { json("{}") }
+          jsonPath("$.content") { isArray() }
+          jsonPath("$.page.size") { equals(10) }
         }
   }
 
@@ -83,6 +114,12 @@ class TodoControllerTest {
           //          content { contentType(MediaType.APPLICATION_JSON) }
         }
   }
+
+  @Test
+  fun `delete works`() {
+
+    mockMvc.delete("/v1/todos/{id}", UUID.randomUUID()).andExpect { status { isNoContent() } }
+  }
 }
 
-data class TestTodoResource(val id: UUID, val name: String)
+data class TestTodoResource(val id: UUID, val name: String, val completed: Boolean)

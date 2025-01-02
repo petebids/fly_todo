@@ -9,12 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cerbos/core": "^0.19.0",
+    "@cerbos/react": "^0.1.4",
     "@heroicons/react": "^2.2.0",
     "@rsql/builder": "^1.6.0",
     "@rsql/emitter": "^1.6.0",
     "@tanstack/react-query": "^5.62.11",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.3",
     "heroicons": "^2.2.0",
     "next": "15.1.2",
+    "pg": "^8.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
@@ -23,12 +28,15 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
+    "@types/pg": "^8.11.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.30.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.2",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }
